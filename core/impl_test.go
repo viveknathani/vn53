@@ -6,5 +6,7 @@ import (
 )
 
 func TestLookup(t *testing.T) {
-	log.Print(Lookup("www.example.com"))
+	if Lookup("vivekn.dev") != "45.79.126.128" {
+		log.Fatal("failed!")
+	}
 }

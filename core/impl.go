@@ -137,7 +137,10 @@ func decodeCompressedName(length byte, reader *bytes.Reader) []byte {
 		log.Fatal(err)
 	}
 	result := decodeName(reader)
-	reader.Seek(currentPos, io.SeekStart)
+	_, err = reader.Seek(currentPos, io.SeekStart)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return result
 }
 

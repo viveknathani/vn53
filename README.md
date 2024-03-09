@@ -2,7 +2,7 @@
 
 A DNS resolver made for fun!
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/viveknathani/vn53)](https://goreportcard.com/report/github.com/viveknathani/vn53) [![Maintainability](https://api.codeclimate.com/v1/badges/3a88100c22a2b6e20df9/maintainability)](https://codeclimate.com/github/viveknathani/vn53/maintainability) [![test](https://github.com/viveknathani/vn53/actions/workflows/test.yaml/badge.svg)](https://github.com/viveknathani/vn53/actions/workflows/test.yaml) ![release](https://img.shields.io/github/v/release/viveknathani/vn53)
+[![Maintainability](https://api.codeclimate.com/v1/badges/3a88100c22a2b6e20df9/maintainability)](https://codeclimate.com/github/viveknathani/vn53/maintainability) [![test](https://github.com/viveknathani/vn53/actions/workflows/test.yaml/badge.svg)](https://github.com/viveknathani/vn53/actions/workflows/test.yaml) ![release](https://img.shields.io/github/v/release/viveknathani/vn53)
 
 <img src="./vn53.png">
 

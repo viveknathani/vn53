@@ -14,26 +14,60 @@ import (
 
 // Lookup returns the IP address for the given hostname
 func Lookup(hostname string) string {
-	const ip = "8.8.8.8"
+	ip := ROOT_SERVER
+	recordType := RECORD_TYPE_A
+	hostname = strings.TrimSuffix(hostname, ".")
+	for {
+		fmt.Printf("asking %s for %s\n", ip, hostname)
+		packet := sendQuery(ip, hostname, uint16(recordType))
+
+		// check for a direct answer
+		for _, ans := range packet.Answers {
+			if ans.RecordType == RECORD_TYPE_A {
+				return parseIP(ans.Data)
+			}
+		}
+
+		// all right, see if we have a nameserver we can hit?
+		weHaveNSWithARecord := false
+		for _, add := range packet.Additionals {
+			if add.RecordType == RECORD_TYPE_A {
+				ip = parseIP(add.Data)
+				weHaveNSWithARecord = true
+				break
+			}
+		}
+
+		if weHaveNSWithARecord {
+			continue
+		}
+
+		// we have a name server domain, get it's IP first
+		for _, auth := range packet.Authorities {
+			if auth.RecordType == RECORD_TYPE_NS && string(auth.Data) != "" {
+				ip = Lookup(string(auth.Data))
+				break
+			}
+		}
+	}
+}
+
+func sendQuery(ip string, hostname string, recordType uint16) *Packet {
 	conn, err := net.Dial("udp", fmt.Sprintf("%s:53", ip))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-
-	_, err = conn.Write(buildQuery(hostname))
+	_, err = conn.Write(buildQuery(hostname, recordType))
 	if err != nil {
 		panic(err)
 	}
-
 	response := make([]byte, MAX_DNS_PACKET_SIZE_IN_BYTES)
 	_, err = conn.Read(response)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	packet := parsePacket(response)
-	return parseIP(packet.Answers[0].Data)
+	return parsePacket(response)
 }
 
 func encodeHostname(hostname string) []byte {
@@ -72,10 +106,10 @@ func questionToBytes(question Question) []byte {
 	return result.Bytes()
 }
 
-func buildQuery(hostname string) []byte {
+func buildQuery(hostname string, recordType uint16) []byte {
 	var query bytes.Buffer
-	header := newHeader(uint16(rand.Int()), RECURSION_DESIRED, DEFAULT_NUMBER_OF_QUESTIONS)
-	question := newQuestion(encodeHostname(hostname), RECORD_TYPE_A, CLASS_TYPE_IN)
+	header := newHeader(uint16(rand.Int()), RECURSION_NOT_DESIRED, DEFAULT_NUMBER_OF_QUESTIONS)
+	question := newQuestion(encodeHostname(hostname), recordType, CLASS_TYPE_IN)
 	query.Write(headerToBytes(*header))
 	query.Write(questionToBytes(*question))
 	return query.Bytes()
@@ -146,9 +180,13 @@ func parseRecord(reader *bytes.Reader) *Record {
 		log.Fatal(err)
 	}
 	var data = make([]byte, internalR.DataSize)
-	_, err = io.ReadFull(reader, data)
-	if err != nil {
-		log.Fatal(err)
+	if internalR.RecordType == RECORD_TYPE_NS {
+		data = decodeName(reader)
+	} else {
+		_, err = io.ReadFull(reader, data)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	return &Record{
 		Name:       name,

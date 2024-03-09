@@ -1,6 +1,5 @@
 build:
-	go build -o ./bin/ ./cmd/server/
-	go build -o ./bin/ ./cmd/client/
+	go build -o ./bin/ main.go
 
 test:
 	go test -v ./...

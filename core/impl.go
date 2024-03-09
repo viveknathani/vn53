@@ -18,7 +18,7 @@ func Lookup(hostname string) string {
 	recordType := RECORD_TYPE_A
 	hostname = strings.TrimSuffix(hostname, ".")
 	for {
-		fmt.Printf("asking %s for %s\n", ip, hostname)
+		fmt.Printf(">> asking %s for %s\n", ip, hostname)
 		packet := sendQuery(ip, hostname, uint16(recordType))
 
 		// check for a direct answer

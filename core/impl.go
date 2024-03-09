@@ -128,8 +128,14 @@ func decodeCompressedName(length byte, reader *bytes.Reader) []byte {
 	b, _ := reader.ReadByte()
 	pointerBytes := []byte{length & 0b0011_1111, b}
 	pointer := binary.BigEndian.Uint16(pointerBytes)
-	currentPos, _ := reader.Seek(0, io.SeekCurrent)
-	reader.Seek(int64(pointer), io.SeekStart)
+	currentPos, err := reader.Seek(0, io.SeekCurrent)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = reader.Seek(int64(pointer), io.SeekStart)
+	if err != nil {
+		log.Fatal(err)
+	}
 	result := decodeName(reader)
 	reader.Seek(currentPos, io.SeekStart)
 	return result
@@ -149,7 +155,10 @@ func decodeName(reader *bytes.Reader) []byte {
 			break
 		} else {
 			part := make([]byte, length)
-			io.ReadFull(reader, part)
+			_, err := io.ReadFull(reader, part)
+			if err != nil {
+				log.Fatal(err)
+			}
 			name = append(name, part...)
 			// add a period "."
 			name = append(name, 46)

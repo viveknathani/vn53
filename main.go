@@ -19,7 +19,7 @@ func main() {
 			fmt.Printf("goodbye!\n")
 			break
 		}
-		ip := core.Lookup(input)
+		ip := core.Lookup(input, os.Getenv("DEBUG") == "true")
 		fmt.Printf(">> The IP is %s.\n", ip)
 	}
 }

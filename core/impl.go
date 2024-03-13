@@ -13,7 +13,7 @@ import (
 )
 
 // Lookup returns the IP address for the given hostname
-func Lookup(hostname string) string {
+func Lookup(hostname string, debug bool) string {
 	ip := ROOT_SERVER
 	recordType := RECORD_TYPE_A
 	hostname = strings.TrimSuffix(hostname, ".")
@@ -21,6 +21,9 @@ func Lookup(hostname string) string {
 		fmt.Printf(">> asking %s for %s\n", ip, hostname)
 		previousIP := ip
 		packet := sendQuery(ip, hostname, uint16(recordType))
+		if debug {
+			printPacket(*packet)
+		}
 		// check for a direct answer
 		for _, ans := range packet.Answers {
 			if ans.RecordType == RECORD_TYPE_A {
@@ -45,7 +48,7 @@ func Lookup(hostname string) string {
 		// we have a name server domain, get it's IP first
 		for _, auth := range packet.Authorities {
 			if auth.RecordType == RECORD_TYPE_NS && string(auth.Data) != "" {
-				ip = Lookup(string(auth.Data))
+				ip = Lookup(string(auth.Data), debug)
 				break
 			}
 		}

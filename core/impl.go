@@ -19,8 +19,8 @@ func Lookup(hostname string) string {
 	hostname = strings.TrimSuffix(hostname, ".")
 	for {
 		fmt.Printf(">> asking %s for %s\n", ip, hostname)
+		previousIP := ip
 		packet := sendQuery(ip, hostname, uint16(recordType))
-
 		// check for a direct answer
 		for _, ans := range packet.Answers {
 			if ans.RecordType == RECORD_TYPE_A {
@@ -49,7 +49,13 @@ func Lookup(hostname string) string {
 				break
 			}
 		}
+
+		if ip == previousIP {
+			fmt.Printf(">> not found, ending!\n")
+			break
+		}
 	}
+	return "not found"
 }
 
 func sendQuery(ip string, hostname string, recordType uint16) *Packet {
@@ -244,4 +250,21 @@ func parseIP(data []byte) string {
 	}
 	ip.WriteString(strconv.Itoa(int(data[3])))
 	return ip.String()
+}
+
+func printPacket(packet Packet) {
+	fmt.Println(">> ========================= START OF PACKET =========================")
+	fmt.Println(">> answer")
+	for _, ans := range packet.Answers {
+		fmt.Printf(">> answer for %s is %s\n", string(ans.Name), parseIP(ans.Data))
+	}
+	fmt.Println(">> authorities")
+	for _, ans := range packet.Authorities {
+		fmt.Printf(">> authoritiy for %s is %s\n", string(ans.Name), parseIP(ans.Data))
+	}
+	fmt.Println(">> additionals")
+	for _, ans := range packet.Additionals {
+		fmt.Printf(">> additonal for %s is %s\n", string(ans.Name), parseIP(ans.Data))
+	}
+	fmt.Println(">> ========================= END OF PACKET  ==========================")
 }

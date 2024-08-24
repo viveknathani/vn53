@@ -1,4 +1,4 @@
-use super::{constants::MIN_RECORD_SIZE_BYTES, Question};
+use super::{constants::MIN_RECORD_SIZE_BYTES, Question, DNS_RECORD_TYPE_NS};
 use std::io::{Error, ErrorKind};
 
 #[derive(Debug)]
@@ -46,7 +46,11 @@ impl Record {
         let data_len = u16::from_be_bytes([bytes[cursor], bytes[cursor + 1]]);
         cursor += 2;
 
-        let data = bytes[cursor..cursor + data_len as usize].to_vec();
+        let mut data = bytes[cursor..cursor + data_len as usize].to_vec();
+        if record_type == DNS_RECORD_TYPE_NS {
+            let (decoded, _) = Question::decode_name(&data, 0)?;
+            data = decoded.as_bytes().to_vec();
+        }
         cursor += data_len as usize;
 
         Ok((
@@ -64,7 +68,7 @@ impl Record {
     /// Constructs a vector of records from the given DNS packet.
     /// It cannot know where to stop, hence it requires `n`.
     /// ### Parameters
-    /// - `n`: How many bytes do we read.
+    /// - `n`: How many records do we read.
     /// - `bytes`: Raw bytes of your DNS packet.
     /// - `cursor`: Where do we begin reading the packet from.
     ///

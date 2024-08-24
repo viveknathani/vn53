@@ -49,14 +49,18 @@ impl Question {
         while cursor < bytes.len() {
             let length = bytes[cursor] as usize;
 
+            // Skip the byte containing the length.
+            cursor += 1;
+
             // The maximum length of a component of a DNS name is 63 characters.
             // So in a normal DNS name part the top 2 bits will never be set.
             // If it is, we know it is compressed.
             if length & 0b1100_0000 != 0 {
-                let (compressed_name, next_cursor) =
-                    Question::decode_name_compressed(bytes, cursor)?;
+                let (compressed_name, updated_cursor) =
+                    Question::decode_name_compressed(bytes, length, cursor)?;
                 parts.push(compressed_name);
-                cursor = next_cursor;
+                cursor = updated_cursor;
+                break;
             }
 
             if length == 0 {
@@ -77,15 +81,17 @@ impl Question {
         Ok((parts.join("."), cursor))
     }
 
-    fn decode_name_compressed(bytes: &[u8], mut cursor: usize) -> Result<(String, usize), Error> {
+    fn decode_name_compressed(
+        bytes: &[u8],
+        length: usize,
+        mut cursor: usize,
+    ) -> Result<(String, usize), Error> {
         if cursor >= bytes.len() {
             return Err(Error::new(
                 ErrorKind::InvalidData,
                 "name has invalid length, could have led to out of bounds access",
             ));
         }
-
-        let length = bytes[cursor] as usize;
 
         // Extracts a 16-bit pointer from the DNS message:
         //
@@ -99,12 +105,12 @@ impl Question {
         // 4. Ensure that the next byte is safely accessed; if out of bounds, an error is returned.
         let pointer = ((length & 0b0011_1111) as usize) << 8
             | (*bytes
-                .get(cursor + 1)
+                .get(cursor)
                 .ok_or_else(|| Error::new(ErrorKind::InvalidData, "pointer byte missing"))?
                 as usize);
 
-        // Skip past the pointer bytes.
-        cursor += 2;
+        // Skip past the second pointer byte.
+        cursor += 1;
 
         // Decode the name at the pointer
         let (referenced_name, _) = Question::decode_name(bytes, pointer)?;

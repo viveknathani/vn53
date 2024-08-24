@@ -4,9 +4,9 @@ use super::constants::MIN_QUESTION_SIZE_BYTES;
 
 #[derive(Debug)]
 pub struct Question {
-    qname: Vec<u8>,
-    qtype: u16,
-    qclass: u16,
+    pub qname: Vec<u8>,
+    pub qtype: u16,
+    pub qclass: u16,
 }
 
 impl Question {
@@ -63,7 +63,7 @@ impl Question {
                 break;
             }
 
-            if cursor + length >= bytes.len() {
+            if cursor + length > bytes.len() {
                 return Err(Error::new(
                     ErrorKind::InvalidData,
                     "name has invalid length, could have led to out of bounds access",

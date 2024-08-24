@@ -3,12 +3,12 @@ use std::io::{Error, ErrorKind};
 
 #[derive(Debug)]
 pub struct Header {
-    id: u16,
-    flags: u16,
-    num_questions: u16,
-    num_answers: u16,
-    num_authorities: u16,
-    num_additionals: u16,
+    pub id: u16,
+    pub flags: u16,
+    pub num_questions: u16,
+    pub num_answers: u16,
+    pub num_authorities: u16,
+    pub num_additionals: u16,
 }
 
 impl Header {

@@ -36,3 +36,4 @@ pub const DNS_CLASS_RESERVED_65535: u16 = 65535;
 pub const HEADER_SIZE_BYTES: usize = 12;
 pub const MIN_QUESTION_SIZE_BYTES: usize = 4;
 pub const MIN_RECORD_SIZE_BYTES: usize = 8;
+pub const MAX_DNS_PACKET_BYTES: usize = 1024;

@@ -1,5 +1,5 @@
-use vn53::resolver;
+use vn53::resolver::{self, DNS_RECORD_TYPE_A};
 
 fn main() {
-    resolver::Resolver::resolve("vivekn.dev", &"198.41.0.4").unwrap();
+    resolver::Resolver::resolve("vivekn.dev", DNS_RECORD_TYPE_A).unwrap();
 }

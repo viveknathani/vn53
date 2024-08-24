@@ -77,10 +77,10 @@ impl Resolver {
         Ok(())
     }
 
-    pub fn resolve(domain_name: &str, ip: &str) -> Result<String, Error> {
-        let mut nameserver = ip.to_string();
+    pub fn resolve(domain_name: &str, record_type: u16) -> Result<String, Error> {
+        let mut nameserver = "198.41.0.4".to_string();
         let domain_name = domain_name.trim_end_matches('.');
-        let record_type = DNS_RECORD_TYPE_A;
+        let record_type = record_type;
 
         loop {
             println!(">> asking {} for {}", nameserver, domain_name);
@@ -91,7 +91,7 @@ impl Resolver {
             } else if let Some(ns_ip) = Resolver::get_nameserver_ip(&packet) {
                 nameserver = ns_ip;
             } else if let Some(ns_domain) = Resolver::get_nameserver(&packet) {
-                nameserver = Resolver::resolve(&ns_domain, &nameserver)?;
+                nameserver = Resolver::resolve(&ns_domain, DNS_RECORD_TYPE_A)?;
             } else {
                 println!(">> not found, ending!");
                 return Err(Error::new(ErrorKind::NotFound, "domain not found"));

@@ -2,6 +2,8 @@
 
 A DNS resolver made for fun!
 
+Note: This is a rewrite in Rust from the original version written in Go. [See this](https://github.com/viveknathani/vn53/tree/go).
+
 ![release](https://img.shields.io/github/v/release/viveknathani/vn53)
 
 ## motivation
